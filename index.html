@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volume Control</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .rotary-control {
+            width: 150px;
+            height: 150px;
+            background: #2a303c;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transform-origin: center center;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .rotary-knob {
+            position: absolute;
+            width: 4px;
+            height: 40%;
+            background: #a6adba;
+            left: 50%;
+            transform-origin: bottom center;
+            top: 10%;
+        }
+        
+        .rotary-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .mark {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #a6adba;
+            left: 50%;
+            transform-origin: bottom center;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .volume-change-animation {
+            animation: pulse 0.3s ease-out;
+        }
+
+        /* Archery Volume Control Styles */
+        .archery-control {
+            width: 300px;
+            height: 150px;
+            position: relative;
+            background: #2a303c;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bow {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 100px;
+            border: 4px solid #a6adba;
+            border-left: none;
+            border-radius: 0 100px 100px 0;
+        }
+
+        .arrow {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 4px;
+            background: #a6adba;
+            cursor: pointer;
+        }
+
+        .arrow::before {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: -8px;
+            border-left: 12px solid #a6adba;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .fire-effect {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            background: linear-gradient(90deg, transparent, #ff4d4d);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .target-area {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 100px;
+            border: 4px solid #a6adba;
+            border-radius: 5px;
+        }
+
+        .target-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: #ff4d4d;
+            transition: height 0.3s;
+        }
+
+        @keyframes fire {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+
+        .fire-active {
+            animation: fire 0.5s ease-out;
+        }
+
+        /* Number Jump Control Styles */
+        .number-jump-control {
+            width: 300px;
+            height: 150px;
+            position: relative;
+            background: #2a303c;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .number-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding: 30px 0;
+        }
+
+        .jump-number {
+            font-size: 24px;
+            color: #a6adba;
+            cursor: pointer;
+            transition: transform 0.2s, color 0.2s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .jump-number:hover {
+            color: #fff;
+            transform: translateY(-5px);
+        }
+
+        .jump-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #a6adba;
+            z-index: 1;
+        }
+
+        .character {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            transform: translateX(-50%) translateY(-50%);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+
+        .character svg {
+            width: 100%;
+            height: 100%;
+            fill: #ff4d4d;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(-50%); }
+            50% { transform: translateX(-50%) translateY(-70%); }
+        }
+
+        .character.bouncing {
+            animation: bounce 0.5s ease-out;
+        }
+
+        /* MacOS Volume HUD Styles */
+        .volume-hud {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            transition: transform 0.2s ease;
+        }
+
+        .volume-hud.active {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .volume-hud-icon {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+        .volume-hud-bar {
+            width: 180px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .volume-hud-fill {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            transition: width 0.1s ease;
+        }
+
+        .volume-hud-text {
+            color: white;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* 3D Button Styles */
+        .button-3d-control {
+            width: 300px;
+            height: 150px;
+            position: relative;
+            background: #2a303c;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .button-3d {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateX(10deg);
+            transition: transform 0.2s;
+        }
+
+        .button-3d:active {
+            transform: perspective(1000px) rotateX(10deg) translateY(4px);
+        }
+
+        .button-3d-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #3d4451, #2a303c);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 
+                inset 2px 2px 5px rgba(255, 255, 255, 0.1),
+                inset -2px -2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-3d-edge {
+            position: absolute;
+            width: 100%;
+            height: 15px;
+            background: #232831;
+            bottom: -15px;
+            transform-origin: top;
+            transform: rotateX(-90deg);
+            border-radius: 0 0 15px 15px;
+        }
+
+        .button-3d-left {
+            position: absolute;
+            width: 15px;
+            height: 100%;
+            background: #232831;
+            left: -15px;
+            transform-origin: right;
+            transform: rotateY(90deg);
+            border-radius: 15px 0 0 15px;
+        }
+
+        .button-3d.volume-up:hover {
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+        }
+
+        .button-3d.volume-down:hover {
+            background: linear-gradient(145deg, #f44336, #d32f2f);
+        }
+
+        .button-3d svg {
+            width: 40px;
+            height: 40px;
+            fill: currentColor;
+        }
+
+        .button-press-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .button-3d:active .button-press-effect {
+            opacity: 1;
+        }
+
+        @keyframes buttonGlow {
+            0% { box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+            50% { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+            100% { box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        }
+
+        .button-3d-face:hover {
+            animation: buttonGlow 2s infinite;
+        }
+
+        /* Vision Pro Login Styles */
+        .login-container {
+            position: relative;
+            width: 100%;
+            min-height: 400px;
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+
+        .persona {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) translateZ(50px);
+            border-radius: 50%;
+            background: linear-gradient(145deg, #3d4451, #2a303c);
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.3),
+                inset 0 2px 10px rgba(255,255,255,0.2);
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .persona:hover {
+            transform: translate(-50%, -50%) translateZ(80px) scale(1.1);
+        }
+
+        .persona-ring {
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: ringPulse 2s infinite;
+        }
+
+        @keyframes ringPulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.2; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        }
+
+        .login-form {
+            position: relative;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .login-form.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .floating-label {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .floating-label input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .floating-label label {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.6);
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label {
+            top: 0;
+            font-size: 12px;
+            background: rgba(42,48,60,0.8);
+            padding: 0 5px;
+            border-radius: 5px;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(145deg, #3d4451, #2a303c);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .login-button:active {
+            transform: translateY(1px);
+        }
+
+        /* Sound visualization */
+        .sound-wave {
+            position: absolute;
+            width: 200px;
+            height: 2px;
+            background: rgba(255,255,255,0.2);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 1px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .sound-wave.active {
+            opacity: 1;
+            animation: waveEffect 0.5s ease-out;
+        }
+
+        @keyframes waveEffect {
+            0% { transform: translate(-50%, -50%) scaleX(0.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scaleX(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200 flex flex-col items-center justify-center p-8">
+    <!-- Theme Switcher -->
+    <div class="theme-switcher">
+        <button class="btn btn-circle" onclick="toggleTheme()">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Login Section -->
+    <div class="login-container">
+        <div class="persona-ring"></div>
+        <div class="persona" onclick="showLoginForm()">
+            <div class="sound-wave"></div>
+        </div>
+        <div class="login-form" id="loginForm">
+            <div class="floating-label">
+                <input type="text" id="username" placeholder=" ">
+                <label for="username">Username</label>
+            </div>
+            <div class="floating-label">
+                <input type="password" id="password" placeholder=" ">
+                <label for="password">Password</label>
+            </div>
+            <button class="login-button" onclick="handleLogin()">Login</button>
+        </div>
+    </div>
+
+    <!-- Volume Controls Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl">
+        <!-- Original Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title">Slider Control</h2>
+                <div class="form-control">
+                    <input type="range" min="0" max="100" value="50" class="range" step="1" id="volumeRange" />
+                    <div class="w-full flex justify-between text-xs px-2 mt-2">
+                        <span>0</span>
+                        <span>25</span>
+                        <span>50</span>
+                        <span>75</span>
+                        <span>100</span>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <span class="text-xl font-bold" id="volumeValue">50</span>%
+                </div>
+                <div class="card-actions justify-center mt-4">
+                    <button class="btn btn-circle btn-lg" id="muteButton">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 8v8l-4-4H5a1 1 0 01-1-1v-2a1 1 0 011-1h3l4-4z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rotary Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body items-center">
+                <h2 class="card-title">Rotary Control</h2>
+                <div class="rotary-control" id="rotaryControl">
+                    <div class="rotary-marks" id="rotaryMarks"></div>
+                    <div class="rotary-knob"></div>
+                </div>
+                <div class="text-center mt-4">
+                    <span class="text-xl font-bold" id="rotaryValue">50</span>%
+                </div>
+            </div>
+        </div>
+
+        <!-- Archery Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body items-center">
+                <h2 class="card-title">Archery Control</h2>
+                <div class="archery-control">
+                    <div class="bow"></div>
+                    <div class="arrow" id="archeryControl"></div>
+                    <div class="fire-effect" id="fireEffect"></div>
+                    <div class="target-area">
+                        <div class="target-fill" id="targetFill" style="height: 50%"></div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <span class="text-xl font-bold" id="archeryValue">50</span>%
+                </div>
+            </div>
+        </div>
+
+        <!-- Number Jump Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body items-center">
+                <h2 class="card-title">Number Jump Control</h2>
+                <div class="number-jump-control">
+                    <div class="number-line">
+                        <div class="jump-line"></div>
+                        <div class="character" id="jumpCharacter">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                            </svg>
+                        </div>
+                        <span class="jump-number" data-value="0">0</span>
+                        <span class="jump-number" data-value="25">25</span>
+                        <span class="jump-number" data-value="50">50</span>
+                        <span class="jump-number" data-value="75">75</span>
+                        <span class="jump-number" data-value="100">100</span>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <span class="text-xl font-bold" id="jumpValue">50</span>%
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Button Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body items-center">
+                <h2 class="card-title">3D Button Control</h2>
+                <div class="button-3d-control">
+                    <div class="button-3d volume-down" id="volumeDown3D">
+                        <div class="button-3d-face">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M18.5,12c0-1.77-1.02-3.29-2.5-4.03v8.05C17.48,15.29,18.5,13.77,18.5,12z M5,9v6h4l5,5V4L9,9H5z"/>
+                            </svg>
+                            <div class="button-press-effect"></div>
+                        </div>
+                        <div class="button-3d-edge"></div>
+                        <div class="button-3d-left"></div>
+                    </div>
+                    <div class="button-3d volume-up" id="volumeUp3D">
+                        <div class="button-3d-face">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3,9v6h4l5,5V4L7,9H3z M16.5,12c0-1.77-1.02-3.29-2.5-4.03v8.05C15.48,15.29,16.5,13.77,16.5,12z M14,3.23v2.06 c2.89,0.86,5,3.54,5,6.71s-2.11,5.85-5,6.71v2.06c4-0.91,7-4.49,7-8.77S18,4.14,14,3.23z"/>
+                            </svg>
+                            <div class="button-press-effect"></div>
+                        </div>
+                        <div class="button-3d-edge"></div>
+                        <div class="button-3d-left"></div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <span class="text-xl font-bold" id="button3dValue">50</span>%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MacOS Volume HUD -->
+    <div class="volume-hud" id="volumeHud">
+        <svg class="volume-hud-icon" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L9 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4-.91 7-4.49 7-8.77S18 4.14 14 3.23z"/>
+        </svg>
+        <div class="volume-hud-bar">
+            <div class="volume-hud-fill" id="volumeHudFill"></div>
+        </div>
+        <div class="volume-hud-text">Press F11/F12 to adjust volume</div>
+    </div>
+
+    <script>
+        // Audio Context for sound effects
+        let audioContext;
+        let isAudioInitialized = false;
+
+        function initAudio() {
+            if (!isAudioInitialized) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                isAudioInitialized = true;
+            }
+        }
+
+        function playSound(frequency, duration, type = 'sine') {
+            initAudio();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playLoginSound() {
+            playSound(880, 0.1, 'sine');
+            setTimeout(() => playSound(1760, 0.1, 'sine'), 100);
+        }
+
+        function playHoverSound() {
+            playSound(440, 0.05, 'sine');
+        }
+
+        function showLoginForm() {
+            const loginForm = document.getElementById('loginForm');
+            loginForm.classList.add('show');
+            playLoginSound();
+            
+            const soundWave = document.querySelector('.sound-wave');
+            soundWave.classList.add('active');
+            setTimeout(() => {
+                soundWave.classList.remove('active');
+            }, 500);
+        }
+
+        function handleLogin() {
+            playLoginSound();
+            // Add your login logic here
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            playSound(660, 0.1, 'triangle');
+        }
+
+        // Add hover sound to persona
+        const persona = document.querySelector('.persona');
+        persona.addEventListener('mouseenter', playHoverSound);
+
+        // Add hover sound to buttons
+        document.querySelectorAll('.button-3d').forEach(button => {
+            button.addEventListener('mouseenter', () => playSound(440, 0.05, 'sine'));
+            button.addEventListener('click', () => playSound(880, 0.1, 'sine'));
+        });
+
+        // Original volume control logic
+        const volumeRange = document.getElementById('volumeRange');
+        const volumeValue = document.getElementById('volumeValue');
+        const muteButton = document.getElementById('muteButton');
+        let isMuted = false;
+        let previousVolume = 50;
+
+        volumeRange.addEventListener('input', function() {
+            const value = this.value;
+            updateAllControls(value);
+            if (value > 0) {
+                isMuted = false;
+            }
+        });
+
+        muteButton.addEventListener('click', function() {
+            if (!isMuted) {
+                previousVolume = volumeRange.value;
+                updateAllControls(0);
+                isMuted = true;
+            } else {
+                updateAllControls(previousVolume);
+                isMuted = false;
+            }
+        });
+
+        function updateAllControls(value) {
+            volumeRange.value = value;
+            volumeValue.textContent = value;
+            rotaryValue.textContent = value;
+            archeryValue.textContent = value;
+            jumpValue.textContent = value;
+            button3dValue.textContent = value;
+            updateRotaryKnob(value);
+            updateArcheryControl(value);
+            updateJumpControl(value);
+            updateVolumeHud(value);
+        }
+
+        // Rotary control logic
+        const rotaryControl = document.getElementById('rotaryControl');
+        const rotaryValue = document.getElementById('rotaryValue');
+        const rotaryMarks = document.getElementById('rotaryMarks');
+        let isDragging = false;
+        let startAngle = 0;
+        let currentRotation = 0;
+
+        // Create marks
+        for (let i = 0; i < 28; i++) {
+            const mark = document.createElement('div');
+            mark.className = 'mark';
+            mark.style.transform = `rotate(${i * 10}deg)`;
+            rotaryMarks.appendChild(mark);
+        }
+
+        function updateRotaryKnob(value) {
+            const rotation = (value / 100) * 270 - 135;
+            rotaryControl.style.transform = `rotate(${rotation}deg)`;
+            currentRotation = rotation;
+        }
+
+        rotaryControl.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            const rect = rotaryControl.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+
+            const rect = rotaryControl.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+            let rotation = (currentAngle - startAngle) * (180 / Math.PI);
+            
+            rotation += currentRotation;
+            rotation = Math.max(-135, Math.min(135, rotation));
+            const volume = Math.round(((rotation + 135) / 270) * 100);
+            
+            updateAllControls(volume);
+
+            rotaryControl.classList.add('volume-change-animation');
+            setTimeout(() => {
+                rotaryControl.classList.remove('volume-change-animation');
+            }, 300);
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        // Archery control logic
+        const archeryControl = document.getElementById('archeryControl');
+        const archeryValue = document.getElementById('archeryValue');
+        const fireEffect = document.getElementById('fireEffect');
+        const targetFill = document.getElementById('targetFill');
+        let isArcheryDragging = false;
+        let startX = 0;
+        let currentWidth = 100;
+
+        function updateArcheryControl(value) {
+            const width = Math.max(20, Math.min(240, (value / 100) * 240));
+            archeryControl.style.width = `${width}px`;
+            targetFill.style.height = `${value}%`;
+            
+            if (value > 60) {
+                fireEffect.style.opacity = ((value - 60) / 40) * 0.8;
+            } else {
+                fireEffect.style.opacity = '0';
+            }
+        }
+
+        archeryControl.addEventListener('mousedown', function(e) {
+            isArcheryDragging = true;
+            startX = e.clientX;
+            currentWidth = parseInt(archeryControl.style.width || '100');
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isArcheryDragging) return;
+
+            const diff = startX - e.clientX;
+            const width = Math.max(20, Math.min(240, currentWidth + diff));
+            const volume = Math.round((width / 240) * 100);
+            
+            updateAllControls(volume);
+
+            if (volume > 60) {
+                fireEffect.classList.add('fire-active');
+                setTimeout(() => {
+                    fireEffect.classList.remove('fire-active');
+                }, 500);
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isArcheryDragging = false;
+        });
+
+        // Number Jump Control Logic
+        const jumpControl = document.querySelector('.number-jump-control');
+        const jumpNumbers = document.querySelectorAll('.jump-number');
+        const jumpCharacter = document.getElementById('jumpCharacter');
+        const jumpValue = document.getElementById('jumpValue');
+
+        function updateJumpControl(value) {
+            const totalWidth = jumpControl.offsetWidth - 40; // Adjust for padding
+            const position = (value / 100) * totalWidth;
+            jumpCharacter.style.left = `${position + 20}px`; // Add padding offset
+            jumpValue.textContent = value;
+        }
+
+        jumpNumbers.forEach(number => {
+            number.addEventListener('click', function() {
+                const value = parseInt(this.dataset.value);
+                updateAllControls(value);
+                jumpCharacter.classList.add('bouncing');
+                setTimeout(() => {
+                    jumpCharacter.classList.remove('bouncing');
+                }, 500);
+            });
+
+            number.addEventListener('mouseenter', function() {
+                const value = parseInt(this.dataset.value);
+                const currentValue = parseInt(jumpValue.textContent);
+                if (value > currentValue) {
+                    this.style.color = '#4ade80'; // Green for increase
+                } else if (value < currentValue) {
+                    this.style.color = '#ff4d4d'; // Red for decrease
+                }
+            });
+
+            number.addEventListener('mouseleave', function() {
+                this.style.color = '#a6adba';
+            });
+        });
+
+        let isDraggingJump = false;
+        let jumpStartX;
+
+        jumpControl.addEventListener('mousedown', function(e) {
+            isDraggingJump = true;
+            jumpStartX = e.clientX;
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDraggingJump) return;
+
+            const rect = jumpControl.getBoundingClientRect();
+            const position = e.clientX - rect.left - 20; // Adjust for padding
+            const totalWidth = rect.width - 40;
+            const value = Math.round(Math.max(0, Math.min(100, (position / totalWidth) * 100)));
+            
+            updateAllControls(value);
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDraggingJump = false;
+        });
+
+        // 3D Button Control Logic
+        const volumeDown3D = document.getElementById('volumeDown3D');
+        const volumeUp3D = document.getElementById('volumeUp3D');
+        const button3dValue = document.getElementById('button3dValue');
+        
+        volumeDown3D.addEventListener('click', function() {
+            let currentValue = parseInt(volumeValue.textContent);
+            currentValue = Math.max(0, currentValue - 10);
+            updateAllControls(currentValue);
+            showVolumeHud();
+        });
+        
+        volumeUp3D.addEventListener('click', function() {
+            let currentValue = parseInt(volumeValue.textContent);
+            currentValue = Math.min(100, currentValue + 10);
+            updateAllControls(currentValue);
+            showVolumeHud();
+        });
+
+        // MacBook Volume Control
+        const volumeHud = document.getElementById('volumeHud');
+        const volumeHudFill = document.getElementById('volumeHudFill');
+        let hudTimeout;
+
+        function showVolumeHud() {
+            volumeHud.classList.add('active');
+            clearTimeout(hudTimeout);
+            hudTimeout = setTimeout(() => {
+                volumeHud.classList.remove('active');
+            }, 1500);
+        }
+
+        function updateVolumeHud(value) {
+            volumeHudFill.style.width = `${value}%`;
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F11' || e.key === 'F12') {
+                e.preventDefault();
+                let currentValue = parseInt(volumeValue.textContent);
+                
+                if (e.key === 'F11') {
+                    currentValue = Math.max(0, currentValue - 5);
+                } else {
+                    currentValue = Math.min(100, currentValue + 5);
+                }
+                
+                updateAllControls(currentValue);
+                updateVolumeHud(currentValue);
+                showVolumeHud();
+            }
+        });
+
+        // Initialize controls
+        updateAllControls(50);
+    </script>
+</body>
+</html>
