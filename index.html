@@ -1582,11 +1582,14 @@
         const scratchLabel = document.getElementById('scratchLabel');
         const scratchValue = document.getElementById('scratchValue');
         const scratchFill = document.getElementById('scratchFill');
+        const pencilTool = document.querySelector('.scratch-tool.pencil');
+        const eraserTool = document.querySelector('.scratch-tool.eraser');
         let isScratchDragging = false;
         let lastX = 0;
         let lastY = 0;
         let currentVolume = 0;
         let scratchIntensity = new Array(100).fill(0);
+        let isErasing = false;
 
         // Setup canvas
         const ctx = scratchCanvas.getContext('2d', { willReadFrequently: true });
@@ -1596,8 +1599,12 @@
             const rect = scratchBar.getBoundingClientRect();
             scratchCanvas.width = rect.width;
             scratchCanvas.height = rect.height;
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-            ctx.lineWidth = 3;
+            updateBrush();
+        }
+
+        function updateBrush() {
+            ctx.strokeStyle = isErasing ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)';
+            ctx.lineWidth = isErasing ? 20 : 3;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
         }
@@ -1625,7 +1632,8 @@
             // Update scratch intensity
             const segment = Math.floor((x / rect.width) * 100);
             if (segment >= 0 && segment < 100) {
-                scratchIntensity[segment] = Math.min(1, scratchIntensity[segment] + 0.1);
+                const change = isErasing ? -0.15 : 0.1;
+                scratchIntensity[segment] = Math.max(0, Math.min(1, scratchIntensity[segment] + change));
             }
 
             // Calculate volume based on scratch intensity
@@ -1636,9 +1644,13 @@
                 currentVolume = newVolume;
                 updateAllControls(currentVolume);
                 
-                // Play scratch sound
+                // Play sound effect
                 if (Math.random() < 0.2) {
-                    playSound(1000 + Math.random() * 1000, 0.02, 'triangle');
+                    if (isErasing) {
+                        playSound(200 + Math.random() * 200, 0.02, 'sine');
+                    } else {
+                        playSound(1000 + Math.random() * 1000, 0.02, 'triangle');
+                    }
                 }
             }
 
@@ -1669,6 +1681,14 @@
             const rect = scratchBar.getBoundingClientRect();
             scratchCursor.style.left = `${e.clientX - rect.left}px`;
             scratchCursor.style.top = `${e.clientY - rect.top}px`;
+            
+            if (isErasing) {
+                scratchCursor.style.width = '20px';
+                scratchCursor.style.height = '20px';
+            } else {
+                scratchCursor.style.width = '16px';
+                scratchCursor.style.height = '16px';
+            }
         });
 
         scratchBar.addEventListener('mouseenter', function() {
@@ -1679,6 +1699,21 @@
             if (!isScratchDragging) {
                 scratchCursor.style.display = 'none';
             }
+        });
+
+        // Tool selection
+        pencilTool.addEventListener('click', function() {
+            isErasing = false;
+            pencilTool.classList.add('active');
+            eraserTool.classList.remove('active');
+            updateBrush();
+        });
+
+        eraserTool.addEventListener('click', function() {
+            isErasing = true;
+            eraserTool.classList.add('active');
+            pencilTool.classList.remove('active');
+            updateBrush();
         });
 
         // MacBook Volume Control
