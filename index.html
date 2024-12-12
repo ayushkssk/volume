@@ -509,6 +509,331 @@
             0% { transform: translate(-50%, -50%) scaleX(0.5); opacity: 1; }
             100% { transform: translate(-50%, -50%) scaleX(1.5); opacity: 0; }
         }
+
+        /* Air Pump Volume Control Styles */
+        .air-pump-control {
+            width: 300px;
+            height: 200px;
+            position: relative;
+            background: #2a303c;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .pump-handle {
+            width: 40px;
+            height: 120px;
+            background: linear-gradient(145deg, #3d4451, #2a303c);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transform-origin: bottom center;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .pump-handle:hover {
+            transform: scale(1.05);
+        }
+
+        .pump-handle:active {
+            transform: scaleY(0.8);
+        }
+
+        .pump-handle::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #a6adba;
+            border-radius: 50%;
+        }
+
+        .pressure-gauge {
+            width: 150px;
+            height: 150px;
+            background: #1d232a;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            margin-right: 20px;
+        }
+
+        .gauge-fill {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            background: #ff4d4d;
+            border-radius: 5px 5px 0 0;
+            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gauge-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .gauge-mark {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #a6adba;
+            left: 50%;
+            transform-origin: bottom center;
+        }
+
+        .gauge-value {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #a6adba;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .pump-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 77, 77, 0.5);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translate(0, 0); opacity: 0.8; }
+            100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+
+        .pump-effect {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,77,77,0.2) 0%, transparent 70%);
+            transform: scale(0);
+            pointer-events: none;
+        }
+
+        @keyframes pumpEffect {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* Balloon Pump Volume Control Styles */
+        .balloon-pump-control {
+            width: 300px;
+            height: 250px;
+            position: relative;
+            background: #2a303c;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .pump-body {
+            width: 60px;
+            height: 180px;
+            background: linear-gradient(145deg, #3d4451, #2a303c);
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            transform-origin: bottom center;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transform: rotate(45deg);
+        }
+
+        .pump-top {
+            width: 100%;
+            height: 30px;
+            background: #1d232a;
+            border-radius: 15px 15px 5px 5px;
+            position: relative;
+        }
+
+        .pump-bottom {
+            width: 100%;
+            height: 30px;
+            background: #1d232a;
+            border-radius: 5px 5px 15px 15px;
+        }
+
+        .pump-nozzle {
+            width: 20px;
+            height: 40px;
+            background: #1d232a;
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 10px;
+        }
+
+        .balloon {
+            width: 80px;
+            height: 100px;
+            background: #ff4d4d;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: absolute;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%) scale(var(--scale, 0.5));
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: bottom center;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2);
+        }
+
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 25px;
+            background: #ff4d4d;
+            border-radius: 5px 5px 10px 10px;
+        }
+
+        .pump-body:active {
+            transform: rotate(45deg) scaleY(0.95);
+        }
+
+        .pump-effect {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .pump-effect.active {
+            animation: pumpEffect 0.5s ease-out forwards;
+        }
+
+        @keyframes balloonWobble {
+            0%, 100% { transform: translateX(-50%) scale(var(--scale)) rotate(0deg); }
+            25% { transform: translateX(-50%) scale(var(--scale)) rotate(-2deg); }
+            75% { transform: translateX(-50%) scale(var(--scale)) rotate(2deg); }
+        }
+
+        .balloon.wobble {
+            animation: balloonWobble 0.3s ease-in-out;
+        }
+
+        .volume-value {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #a6adba;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Scratch Fill Volume Control Styles */
+        .scratch-fill-control {
+            width: 300px;
+            position: relative;
+            background: #2a303c;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .scratch-bar {
+            width: 100%;
+            height: 40px;
+            background: #1d232a;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.7;
+            mix-blend-mode: screen;
+        }
+
+        .scratch-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                #ff4d4d,
+                #ff4d4d 10px,
+                #ff6666 10px,
+                #ff6666 20px
+            );
+            width: 0%;
+            transition: width 0.3s ease;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .scratch-cursor {
+            width: 3px;
+            height: 3px;
+            background: #ff4d4d;
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 0 5px #ff4d4d;
+        }
+
+        .scratch-label {
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a6adba;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-base-200 flex flex-col items-center justify-center p-8">
@@ -524,7 +849,7 @@
     <!-- Login Section -->
     <div class="login-container">
         <div class="persona-ring"></div>
-        <div class="persona" onclick="showLoginForm()">
+        <div class="persona">
             <div class="sound-wave"></div>
         </div>
         <div class="login-form" id="loginForm">
@@ -562,7 +887,7 @@
                 <div class="card-actions justify-center mt-4">
                     <button class="btn btn-circle btn-lg" id="muteButton">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 8v8l-4-4H5a1 1 0 01-1-1v-2a1 1 0 011-1h3l4-4z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M12 8v8l-4-4H5a1 1 0 01-1-1v-2a1 1 0 011-1h3l4-4z"/>
                         </svg>
                     </button>
                 </div>
@@ -610,7 +935,7 @@
                         <div class="jump-line"></div>
                         <div class="character" id="jumpCharacter">
                             <svg viewBox="0 0 24 24">
-                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8v8l-4-4H5a1 1 0 01-1-1v-2a1 1 0 011-1h3l4-4z"/>
                             </svg>
                         </div>
                         <span class="jump-number" data-value="0">0</span>
@@ -644,7 +969,7 @@
                     <div class="button-3d volume-up" id="volumeUp3D">
                         <div class="button-3d-face">
                             <svg viewBox="0 0 24 24">
-                                <path d="M3,9v6h4l5,5V4L7,9H3z M16.5,12c0-1.77-1.02-3.29-2.5-4.03v8.05C15.48,15.29,16.5,13.77,16.5,12z M14,3.23v2.06 c2.89,0.86,5,3.54,5,6.71s-2.11,5.85-5,6.71v2.06c4-0.91,7-4.49,7-8.77S18,4.14,14,3.23z"/>
+                                <path d="M3,9v6h4l5,5V4L9,9H3zm13.5,3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14,3.23v2.06 c2.89,0.86,5,3.54,5,6.71s-2.11,5.85-5,6.71v2.06c4-.91,7-4.49,7-8.77S18,4.14,14,3.23z"/>
                             </svg>
                             <div class="button-press-effect"></div>
                         </div>
@@ -657,12 +982,65 @@
                 </div>
             </div>
         </div>
+
+        <!-- Air Pump Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body items-center">
+                <h2 class="card-title">Air Pump Control</h2>
+                <div class="air-pump-control">
+                    <div class="pump-handle" id="pumpHandle"></div>
+                    <div class="pressure-gauge">
+                        <div class="gauge-fill" id="gaugeFill"></div>
+                        <div class="gauge-marks" id="gaugeMarks"></div>
+                        <div class="gauge-value" id="gaugeValue">50%</div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <span class="text-xl font-bold" id="pumpValue">50</span>%
+                </div>
+            </div>
+        </div>
+
+        <!-- Balloon Pump Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body items-center">
+                <h2 class="card-title">Balloon Pump Control</h2>
+                <div class="balloon-pump-control">
+                    <div class="pump-body">
+                        <div class="pump-top"></div>
+                        <div class="pump-bottom"></div>
+                        <div class="pump-nozzle"></div>
+                    </div>
+                    <div class="balloon" style="--scale: 0.5"></div>
+                    <div class="pump-effect"></div>
+                    <div class="volume-value" id="balloonPumpValue">50%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scratch Fill Volume Control -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body items-center">
+                <h2 class="card-title">Scratch Fill Control</h2>
+                <div class="scratch-fill-control">
+                    <div class="scratch-bar" id="scratchBar">
+                        <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+                        <div class="scratch-fill" id="scratchFill"></div>
+                        <div class="scratch-cursor" id="scratchCursor"></div>
+                    </div>
+                    <div class="scratch-label" id="scratchLabel">50%</div>
+                </div>
+                <div class="text-center mt-4">
+                    <span class="text-xl font-bold" id="scratchValue">50</span>%
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- MacOS Volume HUD -->
     <div class="volume-hud" id="volumeHud">
         <svg class="volume-hud-icon" viewBox="0 0 24 24">
-            <path d="M3 9v6h4l5 5V4L9 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4-.91 7-4.49 7-8.77S18 4.14 14 3.23z"/>
+            <path d="M3 9v6h4l5 5V4L9 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06 c2.89,0.86,5,3.54,5,6.71s-2.11,5.85-5,6.71v2.06c4-.91,7-4.49,7-8.77S18,4.14,14,3.23z"/>
         </svg>
         <div class="volume-hud-bar">
             <div class="volume-hud-fill" id="volumeHudFill"></div>
@@ -734,9 +1112,13 @@
             playSound(660, 0.1, 'triangle');
         }
 
-        // Add hover sound to persona
+        // Add hover and click sounds to persona
         const persona = document.querySelector('.persona');
         persona.addEventListener('mouseenter', playHoverSound);
+        persona.addEventListener('click', () => {
+            playLoginSound();
+            showLoginForm();
+        });
 
         // Add hover sound to buttons
         document.querySelectorAll('.button-3d').forEach(button => {
@@ -777,9 +1159,15 @@
             archeryValue.textContent = value;
             jumpValue.textContent = value;
             button3dValue.textContent = value;
+            pumpValue.textContent = value;
+            balloonPumpValue.textContent = value;
+            scratchValue.textContent = value;
             updateRotaryKnob(value);
             updateArcheryControl(value);
             updateJumpControl(value);
+            updatePumpControl(value);
+            updateBalloonPumpControl(value);
+            updateScratchFillControl(value);
             updateVolumeHud(value);
         }
 
@@ -870,11 +1258,11 @@
 
             const diff = startX - e.clientX;
             const width = Math.max(20, Math.min(240, currentWidth + diff));
-            const volume = Math.round((width / 240) * 100);
+            const value = Math.round((width / 240) * 100);
             
-            updateAllControls(volume);
+            updateAllControls(value);
 
-            if (volume > 60) {
+            if (value > 60) {
                 fireEffect.classList.add('fire-active');
                 setTimeout(() => {
                     fireEffect.classList.remove('fire-active');
@@ -964,6 +1352,244 @@
             currentValue = Math.min(100, currentValue + 10);
             updateAllControls(currentValue);
             showVolumeHud();
+        });
+
+        // Air Pump Control Logic
+        const pumpHandle = document.getElementById('pumpHandle');
+        const pumpValue = document.getElementById('pumpValue');
+        const gaugeFill = document.getElementById('gaugeFill');
+        const gaugeMarks = document.getElementById('gaugeMarks');
+        const gaugeValue = document.getElementById('gaugeValue');
+        let isPumpDragging = false;
+        let pumpStartY = 0;
+        let currentHeight = 0;
+
+        function updatePumpControl(value) {
+            const height = Math.max(0, Math.min(120, (value / 100) * 120));
+            pumpHandle.style.height = `${height}px`;
+            gaugeFill.style.height = `${value}%`;
+            gaugeValue.textContent = `${value}%`;
+        }
+
+        function initGaugeMarks() {
+            for (let i = 0; i <= 10; i++) {
+                const mark = document.createElement('div');
+                mark.className = 'gauge-mark';
+                const angle = -150 + (i * 30); // -150 to 150 degrees
+                mark.style.transform = `rotate(${angle}deg) translateX(-50%)`;
+                mark.style.height = i % 2 === 0 ? '15px' : '10px';
+                gaugeMarks.appendChild(mark);
+            }
+        }
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            
+            // Random direction
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 50;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            
+            particle.style.setProperty('--tx', `${tx}px`);
+            particle.style.setProperty('--ty', `${ty}px`);
+            particle.style.animation = 'particleFloat 1s ease-out forwards';
+            
+            document.querySelector('.air-pump-control').appendChild(particle);
+            setTimeout(() => particle.remove(), 1000);
+        }
+
+        pumpHandle.addEventListener('mousedown', function(e) {
+            const rect = pumpHandle.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createParticle(x, y);
+                }, i * 100);
+            }
+        });
+
+        pumpHandle.addEventListener('mousedown', function(e) {
+            isPumpDragging = true;
+            pumpStartY = e.clientY;
+            currentHeight = parseInt(pumpHandle.style.height || '0');
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isPumpDragging) return;
+
+            const diff = pumpStartY - e.clientY;
+            const height = Math.max(0, Math.min(120, currentHeight + diff));
+            const value = Math.round((height / 120) * 100);
+            
+            updateAllControls(value);
+        });
+
+        document.addEventListener('mouseup', function() {
+            isPumpDragging = false;
+        });
+
+        // Initialize gauge marks on load
+        initGaugeMarks();
+
+        // Balloon Pump Control Logic
+        const balloonPumpControl = document.querySelector('.balloon-pump-control');
+        const balloonPumpValue = document.getElementById('balloonPumpValue');
+        const balloon = document.querySelector('.balloon');
+        const pumpBody = document.querySelector('.pump-body');
+        const pumpEffect = document.querySelector('.pump-effect');
+        let isBalloonPumpDragging = false;
+        let balloonPumpStartY = 0;
+        let currentScale = 0.5;
+
+        function updateBalloonPumpControl(value) {
+            const scale = Math.max(0.5, Math.min(1.5, (value / 100) * 1 + 0.5));
+            balloon.style.setProperty('--scale', scale);
+            balloonPumpValue.textContent = `${Math.round(value)}%`;
+        }
+
+        pumpBody.addEventListener('mousedown', function(e) {
+            isBalloonPumpDragging = true;
+            balloonPumpStartY = e.clientY;
+            currentScale = parseFloat(balloon.style.getPropertyValue('--scale'));
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isBalloonPumpDragging) return;
+
+            const diff = balloonPumpStartY - e.clientY;
+            const scale = Math.max(0.5, Math.min(1.5, currentScale + (diff / 100)));
+            const value = Math.round(((scale - 0.5) / 1) * 100);
+            
+            updateAllControls(value);
+
+            pumpBody.classList.add('volume-change-animation');
+            setTimeout(() => {
+                pumpBody.classList.remove('volume-change-animation');
+            }, 300);
+        });
+
+        document.addEventListener('mouseup', function() {
+            isBalloonPumpDragging = false;
+        });
+
+        // Add balloon wobble effect
+        function wobbleBalloon() {
+            balloon.classList.add('wobble');
+            setTimeout(() => {
+                balloon.classList.remove('wobble');
+            }, 300);
+        }
+
+        // Add pump effect
+        function createPumpEffect(e) {
+            const rect = pumpBody.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            pumpEffect.style.left = `${x}px`;
+            pumpEffect.style.top = `${y}px`;
+            pumpEffect.classList.add('active');
+            
+            setTimeout(() => {
+                pumpEffect.classList.remove('active');
+            }, 500);
+        }
+
+        pumpBody.addEventListener('mousedown', function(e) {
+            createPumpEffect(e);
+            wobbleBalloon();
+            playSound(440 + Math.random() * 220, 0.1, 'sine');
+        });
+
+        pumpBody.addEventListener('mousemove', function(e) {
+            if (!isBalloonPumpDragging) return;
+            createPumpEffect(e);
+            if (Math.random() < 0.3) { // Occasionally wobble while dragging
+                wobbleBalloon();
+                playSound(440 + Math.random() * 220, 0.05, 'sine');
+            }
+        });
+
+        // Scratch Fill Control Logic
+        const scratchBar = document.getElementById('scratchBar');
+        const scratchFill = document.getElementById('scratchFill');
+        const scratchCursor = document.getElementById('scratchCursor');
+        const scratchLabel = document.getElementById('scratchLabel');
+        const scratchValue = document.getElementById('scratchValue');
+        let isScratchDragging = false;
+        let scratchCanvas = document.getElementById('scratchCanvas');
+        let ctx = scratchCanvas.getContext('2d');
+
+        function updateScratchFillControl(value) {
+            scratchFill.style.width = `${value}%`;
+            scratchLabel.textContent = `${value}%`;
+            scratchValue.textContent = value;
+        }
+
+        scratchBar.addEventListener('mousedown', function(e) {
+            isScratchDragging = true;
+            updateVolumeFromScratch(e);
+        });
+
+        function updateVolumeFromScratch(e) {
+            const rect = scratchBar.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const width = Math.max(0, Math.min(100, (x / rect.width) * 100));
+            const value = Math.round(width);
+            updateAllControls(value);
+
+            // Create particles while scratching
+            if (Math.random() < 0.3) {
+                createScratchParticle(
+                    e.clientX - rect.left,
+                    e.clientY - rect.top
+                );
+                playSound(440 + Math.random() * 440, 0.05, 'triangle');
+            }
+        }
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isScratchDragging) return;
+            updateVolumeFromScratch(e);
+        });
+
+        document.addEventListener('mouseup', function() {
+            isScratchDragging = false;
+            scratchBar.classList.remove('active');
+        });
+
+        // Track mouse position for cursor
+        scratchBar.addEventListener('mousemove', function(e) {
+            const rect = scratchBar.getBoundingClientRect();
+            scratchCursor.style.left = `${e.clientX - rect.left}px`;
+            scratchCursor.style.top = `${e.clientY - rect.top}px`;
+            
+            if (isScratchDragging) {
+                // Create particles while scratching
+                if (Math.random() < 0.3) {
+                    createScratchParticle(
+                        e.clientX - rect.left,
+                        e.clientY - rect.top
+                    );
+                    playSound(440 + Math.random() * 440, 0.05, 'triangle');
+                }
+            }
+        });
+
+        scratchBar.addEventListener('mouseenter', function() {
+            scratchCursor.style.display = 'block';
+        });
+
+        scratchBar.addEventListener('mouseleave', function() {
+            if (!isScratchDragging) {
+                scratchCursor.style.display = 'none';
+            }
         });
 
         // MacBook Volume Control
