@@ -1015,7 +1015,7 @@
                     <div class="button-3d volume-up" id="volumeUp3D">
                         <div class="button-3d-face">
                             <svg viewBox="0 0 24 24">
-                                <path d="M3,9v6h4l5,5V4L9,9H3zm13.5,3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14,3.23v2.06 c2.89,0.86,5,3.54,5,6.71s-2.11,5.85-5,6.71v2.06c4-.91,7-4.49,7-8.77S18,4.14,14,3.23z"/>
+                                <path d="M3 19h6v-7H3v7zm7 0h12v-7H10v7zM3 5v6h19V5H3z"/>
                             </svg>
                             <div class="button-press-effect"></div>
                         </div>
@@ -1099,7 +1099,7 @@
     <!-- MacOS Volume HUD -->
     <div class="volume-hud" id="volumeHud">
         <svg class="volume-hud-icon" viewBox="0 0 24 24">
-            <path d="M3 9v6h4l5 5V4L9 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06 c2.89,0.86,5,3.54,5,6.71s-2.11,5.85-5,6.71v2.06c4-.91,7-4.49,7-8.77S18,4.14,14,3.23z"/>
+            <path d="M3 19h6v-7H3v7zm7 0h12v-7H10v7zM3 5v6h19V5H3z"/>
         </svg>
         <div class="volume-hud-bar">
             <div class="volume-hud-fill" id="volumeHudFill"></div>
@@ -1618,10 +1618,23 @@
             scratchFill.style.width = `${value}%`;
         }
 
-        function drawScratch(e) {
+        function getEventCoordinates(e) {
             const rect = scratchBar.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            let x, y;
+            
+            if (e.type.startsWith('touch')) {
+                x = e.touches[0].clientX - rect.left;
+                y = e.touches[0].clientY - rect.top;
+            } else {
+                x = e.clientX - rect.left;
+                y = e.clientY - rect.top;
+            }
+            
+            return { x, y, rect };
+        }
+
+        function drawScratch(e) {
+            const { x, y, rect } = getEventCoordinates(e);
 
             // Draw scratch marks
             ctx.beginPath();
@@ -1658,29 +1671,29 @@
             lastY = y;
         }
 
-        scratchBar.addEventListener('mousedown', function(e) {
+        function startScratch(e) {
             isScratchDragging = true;
-            const rect = scratchBar.getBoundingClientRect();
-            lastX = e.clientX - rect.left;
-            lastY = e.clientY - rect.top;
+            const { x, y } = getEventCoordinates(e);
+            lastX = x;
+            lastY = y;
             scratchBar.style.cursor = 'none';
-        });
+            e.preventDefault(); // Prevent scrolling on touch devices
+        }
 
-        document.addEventListener('mousemove', function(e) {
-            if (!isScratchDragging) return;
-            drawScratch(e);
-        });
-
-        document.addEventListener('mouseup', function() {
+        function endScratch() {
             isScratchDragging = false;
             scratchBar.style.cursor = 'crosshair';
-        });
+        }
 
-        // Track mouse position for cursor
-        scratchBar.addEventListener('mousemove', function(e) {
-            const rect = scratchBar.getBoundingClientRect();
-            scratchCursor.style.left = `${e.clientX - rect.left}px`;
-            scratchCursor.style.top = `${e.clientY - rect.top}px`;
+        function updateCursor(e) {
+            if (e.type.startsWith('touch')) {
+                scratchCursor.style.display = 'none';
+                return;
+            }
+
+            const { x, y } = getEventCoordinates(e);
+            scratchCursor.style.left = `${x}px`;
+            scratchCursor.style.top = `${y}px`;
             
             if (isErasing) {
                 scratchCursor.style.width = '20px';
@@ -1689,12 +1702,31 @@
                 scratchCursor.style.width = '16px';
                 scratchCursor.style.height = '16px';
             }
-        });
+        }
 
+        // Mouse Events
+        scratchBar.addEventListener('mousedown', startScratch);
+        document.addEventListener('mousemove', function(e) {
+            if (!isScratchDragging) return;
+            drawScratch(e);
+        });
+        document.addEventListener('mouseup', endScratch);
+
+        // Touch Events
+        scratchBar.addEventListener('touchstart', startScratch, { passive: false });
+        scratchBar.addEventListener('touchmove', function(e) {
+            if (!isScratchDragging) return;
+            drawScratch(e);
+            e.preventDefault(); // Prevent scrolling
+        }, { passive: false });
+        document.addEventListener('touchend', endScratch);
+        document.addEventListener('touchcancel', endScratch);
+
+        // Cursor tracking
+        scratchBar.addEventListener('mousemove', updateCursor);
         scratchBar.addEventListener('mouseenter', function() {
             scratchCursor.style.display = 'block';
         });
-
         scratchBar.addEventListener('mouseleave', function() {
             if (!isScratchDragging) {
                 scratchCursor.style.display = 'none';
