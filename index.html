@@ -628,7 +628,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,77,77,0.2) 0%, transparent 70%);
+            background: radial-gradient(circle at center, rgba(255,77,77,0.2) 0%, transparent 70%);
             transform: scale(0);
             pointer-events: none;
         }
@@ -774,12 +774,23 @@
 
         .scratch-bar {
             width: 100%;
-            height: 40px;
+            height: 60px;
             background: #1d232a;
             border-radius: 8px;
             position: relative;
             overflow: hidden;
             cursor: crosshair;
+        }
+
+        .scratch-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(to right, #ff4d4d, #ff6666);
+            width: 0%;
+            transition: width 0.3s ease;
+            pointer-events: none;
         }
 
         .scratch-canvas {
@@ -789,39 +800,33 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            opacity: 0.7;
-            mix-blend-mode: screen;
-        }
-
-        .scratch-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: repeating-linear-gradient(
-                45deg,
-                #ff4d4d,
-                #ff4d4d 10px,
-                #ff6666 10px,
-                #ff6666 20px
-            );
-            width: 0%;
-            transition: width 0.3s ease;
-            pointer-events: none;
-            opacity: 0.5;
+            mix-blend-mode: multiply;
+            opacity: 0.8;
         }
 
         .scratch-cursor {
-            width: 3px;
-            height: 3px;
-            background: #ff4d4d;
-            border-radius: 50%;
+            width: 16px;
+            height: 16px;
             position: absolute;
             pointer-events: none;
             transform: translate(-50%, -50%);
             display: none;
             z-index: 1000;
-            box-shadow: 0 0 5px #ff4d4d;
+            border: 2px solid #ff4d4d;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .scratch-cursor::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: #ff4d4d;
+            border-radius: 50%;
         }
 
         .scratch-label {
@@ -833,6 +838,47 @@
             font-size: 14px;
             font-weight: bold;
             white-space: nowrap;
+        }
+
+        /* Eraser styles */
+        .scratch-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .scratch-tool {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: #1d232a;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .scratch-tool:hover {
+            background: #2a303c;
+        }
+
+        .scratch-tool.active {
+            border-color: #ff4d4d;
+            background: #2a303c;
+        }
+
+        .scratch-tool svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .scratch-tool.pencil svg {
+            width: 16px;
+            height: 16px;
         }
     </style>
 </head>
@@ -935,7 +981,7 @@
                         <div class="jump-line"></div>
                         <div class="character" id="jumpCharacter">
                             <svg viewBox="0 0 24 24">
-                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8v8l-4-4H5a1 1 0 01-1-1v-2a1 1 0 011-1h3l4-4z"/>
+                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,8v8l-4-4H5a1 1 0 01-1-1v-2a1 1 0 011-1h3l4-4z"/>
                             </svg>
                         </div>
                         <span class="jump-number" data-value="0">0</span>
@@ -1022,10 +1068,23 @@
         <div class="card bg-base-100 shadow-xl">
             <div class="card-body items-center">
                 <h2 class="card-title">Scratch Fill Control</h2>
+                <div class="scratch-controls">
+                    <div class="scratch-tool pencil active">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 19h6v-7H3v7zm7 0h12v-7H10v7zM3 5v6h19V5H3z"/>
+                        </svg>
+                    </div>
+                    <div class="scratch-tool eraser">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.59-5.59L4 12l8 8 8-8z"/>
+                        </svg>
+                    </div>
+                </div>
                 <div class="scratch-fill-control">
                     <div class="scratch-bar" id="scratchBar">
-                        <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
                         <div class="scratch-fill" id="scratchFill"></div>
+                        <div class="scratch-overlay"></div>
+                        <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
                         <div class="scratch-cursor" id="scratchCursor"></div>
                     </div>
                     <div class="scratch-label" id="scratchLabel">50%</div>
@@ -1518,25 +1577,27 @@
 
         // Scratch Fill Control Logic
         const scratchBar = document.getElementById('scratchBar');
-        const scratchFill = document.getElementById('scratchFill');
+        const scratchCanvas = document.getElementById('scratchCanvas');
         const scratchCursor = document.getElementById('scratchCursor');
         const scratchLabel = document.getElementById('scratchLabel');
         const scratchValue = document.getElementById('scratchValue');
+        const scratchFill = document.getElementById('scratchFill');
         let isScratchDragging = false;
         let lastX = 0;
         let lastY = 0;
+        let currentVolume = 0;
+        let scratchIntensity = new Array(100).fill(0);
 
         // Setup canvas
-        const scratchCanvas = document.getElementById('scratchCanvas');
-        const ctx = scratchCanvas.getContext('2d');
+        const ctx = scratchCanvas.getContext('2d', { willReadFrequently: true });
 
         // Set canvas size
         function resizeScratchCanvas() {
             const rect = scratchBar.getBoundingClientRect();
             scratchCanvas.width = rect.width;
             scratchCanvas.height = rect.height;
-            ctx.strokeStyle = '#ff4d4d';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.lineWidth = 3;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
         }
@@ -1545,9 +1606,9 @@
         window.addEventListener('resize', resizeScratchCanvas);
 
         function updateScratchFillControl(value) {
-            scratchFill.style.width = `${value}%`;
             scratchLabel.textContent = `${value}%`;
             scratchValue.textContent = value;
+            scratchFill.style.width = `${value}%`;
         }
 
         function drawScratch(e) {
@@ -1555,30 +1616,34 @@
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
+            // Draw scratch marks
             ctx.beginPath();
             ctx.moveTo(lastX, lastY);
             ctx.lineTo(x, y);
             ctx.stroke();
 
-            lastX = x;
-            lastY = y;
+            // Update scratch intensity
+            const segment = Math.floor((x / rect.width) * 100);
+            if (segment >= 0 && segment < 100) {
+                scratchIntensity[segment] = Math.min(1, scratchIntensity[segment] + 0.1);
+            }
 
-            // Calculate volume based on scratch coverage
-            const imageData = ctx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
-            let scratchedPixels = 0;
-            for (let i = 0; i < imageData.data.length; i += 4) {
-                if (imageData.data[i] > 0 || imageData.data[i + 1] > 0 || imageData.data[i + 2] > 0) {
-                    scratchedPixels++;
+            // Calculate volume based on scratch intensity
+            let totalIntensity = scratchIntensity.reduce((a, b) => a + b, 0);
+            let newVolume = Math.min(100, Math.round(totalIntensity));
+            
+            if (newVolume !== currentVolume) {
+                currentVolume = newVolume;
+                updateAllControls(currentVolume);
+                
+                // Play scratch sound
+                if (Math.random() < 0.2) {
+                    playSound(1000 + Math.random() * 1000, 0.02, 'triangle');
                 }
             }
-            const coverage = (scratchedPixels / (scratchCanvas.width * scratchCanvas.height)) * 400;
-            const value = Math.min(100, Math.round(coverage));
-            updateAllControls(value);
 
-            // Play scratch sound
-            if (Math.random() < 0.3) {
-                playSound(440 + Math.random() * 440, 0.05, 'triangle');
-            }
+            lastX = x;
+            lastY = y;
         }
 
         scratchBar.addEventListener('mousedown', function(e) {
@@ -1586,6 +1651,7 @@
             const rect = scratchBar.getBoundingClientRect();
             lastX = e.clientX - rect.left;
             lastY = e.clientY - rect.top;
+            scratchBar.style.cursor = 'none';
         });
 
         document.addEventListener('mousemove', function(e) {
@@ -1595,6 +1661,7 @@
 
         document.addEventListener('mouseup', function() {
             isScratchDragging = false;
+            scratchBar.style.cursor = 'crosshair';
         });
 
         // Track mouse position for cursor
